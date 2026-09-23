@@ -29,9 +29,15 @@ Desktop.ini
 $RECYCLE.BIN/
 
 # ==============================================================================
-# Whitelist Pre-compiled Distribution Executable & Libs
+# Executables, Releases & Secret Build Scripts (Not for Public Repo)
 # ==============================================================================
-!GTAV_Livery_Studio/GTAV_Livery_Studio.exe
-!GTAV_Livery_Studio/GTAV_Livery_Studio.zip
-!GTAV_Livery_Studio_SourceCode/Libs/*.dll
+GTAV_Livery_Studio/
+*.exe
+*.zip
+*.rar
+**/Build.bat
+/Mo_Giao_Dien_Livery_Studio.bat
 /Day_Code_Len_Github.bat
+
+# Whitelist dependency Libs required to build project in Visual Studio
+!GTAV_Livery_Studio_SourceCode/Libs/*.dll

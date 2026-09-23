@@ -13,7 +13,6 @@ Dự án này sử dụng công nghệ **WPF (XAML)** hiện đại trên nền 
 - **`Auto_Export_UV_Template.py`**: Script kết hợp Blender 5.2 và Sollumz để bóc tách kênh `UVMap 1`. File này được cấu hình **`<EmbeddedResource>`** nhúng ngầm trực tiếp vào nhị phân file `.exe`, không xuất hiện lộ thiên ra ngoài thư mục phân phối để chống lộ và bảo mật mã nguồn.
 - **`Libs/`**: Thư mục chứa các DLL phụ thuộc (`CodeWalker.Core.dll`, `SharpDX*.dll`) để trình biên dịch đóng gói tất cả vào 1 file `.exe` duy nhất.
 - **`GTAV_Livery_Studio.csproj`**: File cấu hình dự án C# WPF .NET 8 (kích hoạt chế độ `PublishSingleFile`).
-- **`Build.bat`**: File bấm 1 phát tự động biên dịch và xuất bản ra đúng **1 file `.exe` duy nhất** tại thư mục `..\GTAV_Livery_Studio\GTAV_Livery_Studio.exe`.
 
 ---
 
@@ -24,4 +23,4 @@ Dự án này sử dụng công nghệ **WPF (XAML)** hiện đại trên nền 
    - Nửa trên là màn hình xem trước giao diện trực quan (Visual Preview).
    - Nửa dưới là mã XAML trực tiếp. Bác sửa đến đâu thì giao diện tự động cập nhật ngay tức thì (Hot Reload / Live Preview).
    - Có thể dùng **Toolbox** kéo thả thêm controls, hoặc dùng bảng **Properties (F4)** để chỉnh màu sắc, bo góc `CornerRadius`, kích thước...
-4. Bấm **F5** để chạy thử, hoặc nhấp đúp file **`Build.bat`** để xuất bản ra file `.exe` bên ngoài!
+4. Bấm **F5** (hoặc `Ctrl + F5`) để chạy thử và kiểm tra ứng dụng!

@@ -1,4 +1,4 @@
-﻿# 🚗 GTA V Livery Template Studio
+# 🚗 GTA V Livery Template Studio
 
 **GTA V Livery Template Studio** là phần mềm chuyên dụng hỗ trợ các modder trích xuất tem xe (UV Layout Template) chất lượng cao **1:1 (4K / 8K / 2K)** trực tiếp từ file mô hình `.yft` hoặc `.yft.xml` của Grand Theft Auto V.
 
@@ -26,9 +26,8 @@ Giao diện được xây dựng bằng công nghệ **C# WPF (XAML) .NET 8** th
 
 ## 📥 Tải Về & Chạy Ngay (Pre-compiled)
 
-Bác có thể tải bản chạy sẵn ngay trong thư mục:
-- 🚀 **`GTAV_Livery_Studio/GTAV_Livery_Studio.exe`** (Chỉ 1 file duy nhất)
-- Hoặc bấm mở nhanh bằng **`Mo_Giao_Dien_Livery_Studio.bat`**.
+Người dùng có thể tải bản chạy trực tiếp (Single-file Portable .EXE) tại mục Releases của dự án:
+👉 **[Tải Về Bản Mới Nhất Tại Đây (GitHub Releases)](https://github.com/kaimediadev-cmd/GTAV_Livery_Studio/releases)**
 
 ### ⚠️ Yêu Cầu Hệ Thống:
 1. **Windows 10/11 64-bit**
@@ -47,9 +46,11 @@ Mã nguồn nằm hoàn toàn trong thư mục **`GTAV_Livery_Studio_SourceCode/
 2. **Mở dự án:**
    - Nhấp đúp vào file solution **`GTAV_Livery_Studio_SourceCode/GTAV_Livery_Studio.slnx`** (hoặc `.sln`).
    - Có thể chỉnh sửa giao diện trực quan bằng **Visual Studio XAML Designer**.
-3. **Biên dịch nhanh 1-click:**
-   - Chạy file **`GTAV_Livery_Studio_SourceCode/Build.bat`**.
-   - Script sẽ tự động đóng gói toàn bộ thư viện và xuất ra 1 file duy nhất tại `GTAV_Livery_Studio/GTAV_Livery_Studio.exe`.
+3. **Biên dịch:**
+   - Biên dịch bằng Visual Studio 2022 (**Build Solution** - `Ctrl + Shift + B`) hoặc thông qua .NET CLI:
+     ```bash
+     dotnet build GTAV_Livery_Studio_SourceCode/GTAV_Livery_Studio.csproj -c Release
+     ```
 
 ---
 
