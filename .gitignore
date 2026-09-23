@@ -1,0 +1,36 @@
+﻿# ==============================================================================
+# GTA V Vehicle Assets & Root Loose Scripts
+# ==============================================================================
+/POLICE1/
+/POLICE2/
+/POLICE3/
+/zmodeler3/
+/zmodeler3.zip
+/CodeWalkerProjects-master/
+/Auto_Export_UV_Template.bat
+/Auto_Export_UV_Template.py
+
+# ==============================================================================
+# Build & IDE Artifacts
+# ==============================================================================
+.vs/
+**/[Bb]in/
+**/[Oo]bj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ==============================================================================
+# OS Files
+# ==============================================================================
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ==============================================================================
+# Whitelist Pre-compiled Distribution Executable & Libs
+# ==============================================================================
+!GTAV_Livery_Studio/GTAV_Livery_Studio.exe
+!GTAV_Livery_Studio/GTAV_Livery_Studio.zip
+!GTAV_Livery_Studio_SourceCode/Libs/*.dll

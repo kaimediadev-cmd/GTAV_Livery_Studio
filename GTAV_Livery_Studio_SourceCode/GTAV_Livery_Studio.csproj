@@ -1,0 +1,73 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <AssemblyName>GTAV_Livery_Studio</AssemblyName>
+    <RootNamespace>GTAVLiveryStudio</RootNamespace>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+
+    <!-- Xuat ban 1 file .exe duy nhat (Single-File Executable) -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
+  <!-- Tham chieu toi CodeWalker.Core va SharpDX trong thu muc Libs -->
+  <ItemGroup>
+    <Reference Include="CodeWalker.Core">
+      <HintPath>Libs\CodeWalker.Core.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="SharpDX">
+      <HintPath>Libs\SharpDX.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="SharpDX.Mathematics">
+      <HintPath>Libs\SharpDX.Mathematics.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="SharpDX.D3DCompiler">
+      <HintPath>Libs\SharpDX.D3DCompiler.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="SharpDX.Direct2D1">
+      <HintPath>Libs\SharpDX.Direct2D1.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D11">
+      <HintPath>Libs\SharpDX.Direct3D11.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="SharpDX.DXGI">
+      <HintPath>Libs\SharpDX.DXGI.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="SharpDX.XAudio2">
+      <HintPath>Libs\SharpDX.XAudio2.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="SharpDX.XInput">
+      <HintPath>Libs\SharpDX.XInput.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Resource logo va icon cho WPF -->
+  <ItemGroup>
+    <Resource Include="app.png" />
+    <Resource Include="app.ico" />
+  </ItemGroup>
+
+  <!-- Nhung ngam toan bo script Python vao ben trong file .exe de bao mat chong copy -->
+  <ItemGroup>
+    <EmbeddedResource Include="Auto_Export_UV_Template.py" />
+  </ItemGroup>
+
+</Project>
