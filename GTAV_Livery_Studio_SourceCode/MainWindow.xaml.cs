@@ -274,6 +274,8 @@ namespace GTAVLiveryStudio
                     UpdateProgress(40, "⚡ Đang khởi động Blender 5.2...");
                     Log($"[2/3] Đang gọi Blender 5.2 trích xuất kênh UV Livery ra thư mục xe: {originalFolder}...");
 
+                    bool hasLiveryWarning = false;
+
                     var psi = new ProcessStartInfo
                     {
                         FileName = blenderPath,
@@ -300,7 +302,12 @@ namespace GTAVLiveryStudio
                                     else if (line.Contains("[Buoc 3")) UpdateProgress(80, "⚡ Blender đang bóc tách đường nét UV...");
                                     else if (line.Contains("[Buoc 4")) UpdateProgress(90, "⚡ Blender đang vẽ và kết xuất file ảnh 1:1...");
 
-                                    if (line.Contains("[Buoc") || line.Contains("THANH CONG") || line.Contains("HOAN TAT") || line.Contains("THONG BAO") || line.Contains(">>>"))
+                                    if (line.Contains("[CANH BAO XE KHONG CO UV TEM]"))
+                                    {
+                                        hasLiveryWarning = true;
+                                    }
+
+                                    if (line.Contains("[Buoc") || line.Contains("THANH CONG") || line.Contains("HOAN TAT") || line.Contains("THONG BAO") || line.Contains("CANH BAO") || line.Contains(">>>"))
                                     {
                                         Log(line);
                                     }
@@ -361,8 +368,18 @@ namespace GTAVLiveryStudio
 
                             btnOpenFolder.IsEnabled = true;
                             btnOpenImage.IsEnabled = true;
-                            UpdateProgress(100, "✅ Hoàn tất mỹ mãn (1:1 Template 4K)!");
-                            SetResultBox(ResultStatus.Success, "ĐÃ XUẤT XONG HOÀN TẤT!", $"Ảnh 1:1 đã lưu tại thư mục xe: {Path.GetFileName(lastGeneratedPreview)}");
+
+                            if (hasLiveryWarning)
+                            {
+                                UpdateProgress(100, "⚠️ Cảnh báo: Xe chưa mở kênh UV Tem!");
+                                SetResultBox(ResultStatus.Error, "CẢNH BÁO: XE KHÔNG CÓ UV TEM!", "Tác giả mod chưa unwrap kênh Livery trong file 3D. Xe không hỗ trợ dán tem trong GTA V.");
+                                MessageBox.Show("CẢNH BÁO: Model 3D của xe này CHƯA ĐƯỢC TÁC GIẢ UNWRAP UV TEM (Kênh UVMap 1 thân xe bị trống/bằng 0).\n\nXe này trong game GTA V không hỗ trợ dán tem livery (chỉ dùng sơn màu nguyên bản). Bạn hãy thử với các dòng xe có hỗ trợ Livery như xe Cảnh sát hoặc các xe mod có ghi 'Template Included'!", "Cảnh báo xe không có UV Tem", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            }
+                            else
+                            {
+                                UpdateProgress(100, "✅ Hoàn tất mỹ mãn (1:1 Template 4K)!");
+                                SetResultBox(ResultStatus.Success, "ĐÃ XUẤT XONG HOÀN TẤT!", $"Ảnh 1:1 đã lưu tại thư mục xe: {Path.GetFileName(lastGeneratedPreview)}");
+                            }
                         });
 
                         SystemSounds.Asterisk.Play();

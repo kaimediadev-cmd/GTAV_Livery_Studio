@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # GTA V Auto UV Livery Template Generator (Universal Smart Filter)
 # Tu dong trich xuat UVMap 1 (Livery Decal) chuan 4K sieu sach cho MOI LOAI XE GTA V
 # Ho tro ca xe nguyen ban (Rockstar) lan xe mod tu GTA5-Mods (ZModeler / Sollumz)
@@ -199,6 +199,10 @@ def generate_livery_template(target_xml_path, out_dir=None, target_size=4096, ex
         total_lines = extract_lines(use_material_paint_filter=False)
 
     print(f"[Buoc 3/4] Da trich xuat xong {total_lines} duong net UV than vo sieu sach!", flush=True)
+
+    if total_lines < 2000:
+        print(f"[CANH BAO XE KHONG CO UV TEM] So duong net UV qua it ({total_lines} net). Xe nay CHUA DUOC TAC GIA UNWRAP UV TEM (Livery Map) cho than xe trong 3D model! Xe khong ho tro dan tem trong GTA V.", flush=True)
+
     print(f"[Buoc 4/4] Dang ket xuat va luu file anh {size}x{size} 1:1...", flush=True)
 
     out_preview = os.path.join(xml_dir, f"{clean_name}_UV_Preview.png")
