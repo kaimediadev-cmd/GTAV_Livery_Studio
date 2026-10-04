@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Media;
@@ -242,6 +242,17 @@ namespace GTAVLiveryStudio
                         Log("[1/3] Phát hiện file .yft nhị phân. Đang gọi CodeWalker.Core giải mã tự động...");
 
                         byte[] yftBytes = File.ReadAllBytes(selectedFilePath);
+
+                        // Kiểm tra chữ ký RSC7 tiêu chuẩn của GTA V
+                        if (yftBytes.Length >= 4)
+                        {
+                            uint headerSig = BitConverter.ToUInt32(yftBytes, 0);
+                            if (headerSig != 0x37435352) // 'RSC7'
+                            {
+                                throw new InvalidDataException("File .yft này thiếu chữ ký chuẩn 'RSC7' của GTA V (thường do lấy trực tiếp từ thư mục stream của FiveM hoặc bị nén/mã hóa riêng).\n\n👉 Cách khắc phục: Hãy dùng OpenIV mở file dlc.rpf gốc của xe và Export file .yft (hoặc .yft.xml) ra máy tính, sau đó kéo vào phần mềm!");
+                            }
+                        }
+
                         var yftFile = new YftFile();
                         yftFile.Load(yftBytes);
 
@@ -368,12 +379,19 @@ namespace GTAVLiveryStudio
                 }
                 catch (Exception ex)
                 {
-                    Log($"[LỖI]: {ex.Message}");
+                    string errorMsg = ex.Message;
+                    if (errorMsg.Contains("unsupported compression method", StringComparison.OrdinalIgnoreCase) ||
+                        errorMsg.Contains("Block length does not match", StringComparison.OrdinalIgnoreCase))
+                    {
+                        errorMsg = "File .yft này không đúng chuẩn nén GTA V gốc (thường do lấy trực tiếp từ thư mục FiveM stream hoặc bị nén/mã hóa riêng).\n\n👉 Cách khắc phục: Hãy dùng OpenIV mở file dlc.rpf của xe và Export file .yft hoặc .yft.xml ra máy tính, sau đó đưa vào phần mềm!";
+                    }
+
+                    Log($"[LỖI]: {errorMsg}");
                     Dispatcher.Invoke(() =>
                     {
                         UpdateProgress(0, "❌ Đã xảy ra lỗi!");
-                        SetResultBox(ResultStatus.Error, "ERROR - XUẤT THẤT BẠI!", ex.Message);
-                        MessageBox.Show($"Có lỗi xảy ra: {ex.Message}", "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                        SetResultBox(ResultStatus.Error, "ERROR - XUẤT THẤT BẠI!", errorMsg);
+                        MessageBox.Show(errorMsg, "Lỗi định dạng file xe", MessageBoxButton.OK, MessageBoxImage.Error);
                     });
                 }
                 finally
