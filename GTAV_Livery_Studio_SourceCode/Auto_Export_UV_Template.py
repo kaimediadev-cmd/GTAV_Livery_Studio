@@ -119,6 +119,90 @@ def generate_livery_template(target_xml_path, out_dir=None, target_size=4096, ex
     # Thu thap mesh hop le
     mesh_objects = [o for o in bpy.data.objects if o.type == "MESH" and not o.name.endswith(".col")]
 
+    def is_layer_valid(mesh, uv_layer):
+        """Kiem tra xem mot UV layer co chua toa do hop le hay bi sup ve goc (0, 1)."""
+        if not uv_layer or len(uv_layer.data) == 0:
+            return False
+        sample_size = min(len(uv_layer.data), 1000)
+        u_vals = [uv_layer.data[i].uv[0] for i in range(sample_size)]
+        v_vals = [uv_layer.data[i].uv[1] for i in range(sample_size)]
+        # Neu tat ca vertex deu bi ghim vao goc (0, 1) do chua unwrap livery
+        pinned = sum(1 for i in range(sample_size) if abs(u_vals[i]) < 0.02 and abs(v_vals[i] - 1.0) < 0.02)
+        if pinned > sample_size * 0.95:
+            return False
+        # Neu bien do toa do bang 0 (tat ca diem sup ve 1 diem duy nhat)
+        if (max(u_vals) - min(u_vals) < 0.005) and (max(v_vals) - min(v_vals) < 0.005):
+            return False
+        return True
+
+    # Kiem tra xem tong the xe co kenh UV Livery (UVMap 1) that su khong
+    has_valid_livery_channel = False
+    for obj in mesh_objects:
+        obj_name = obj.name.lower()
+        if any(kw in obj_name for kw in ["body", "door", "boot", "bonnet", "bumper", "chassis"]):
+            mesh = obj.data
+            for layer in mesh.uv_layers:
+                if "1" in layer.name or "livery" in layer.name.lower() or "ch1" in layer.name.lower():
+                    if is_layer_valid(mesh, layer):
+                        has_valid_livery_channel = True
+                        break
+        if has_valid_livery_channel:
+            break
+
+    use_uvmap_fallback = not has_valid_livery_channel
+
+    if use_uvmap_fallback:
+        print("[THONG BAO XE DUNG UVMAP 0] Phat hien UVMap 1 bi trong/sup ve goc (Xe chua lam kenh tem Livery GTA V).", flush=True)
+        print("[THONG BAO XE DUNG UVMAP 0] Tu dong chuyen sang trich xuat UVMap 0 (Kenh van goc xe tuong tu Blender/ZMD3)...", flush=True)
+    else:
+        print("[THONG BAO] Phat hien kenh UVMap 1 hop le (Kenh Livery Decal chuan GTA V). Dang trich xuat...", flush=True)
+
+    # Tinh toan bounding box neu su dung UVMap 0 o che do toa do rong (Multi-tile)
+    multitile_mode = False
+    scale_min_u, scale_max_u = 0.0, 1.0
+    scale_min_v, scale_max_v = 0.0, 1.0
+    norm_max_span = 1.0
+    norm_off_u, norm_off_v = 0.0, 0.0
+    norm_span_with_pad = 1.0
+
+    if use_uvmap_fallback:
+        all_body_u = []
+        all_body_v = []
+        for obj in mesh_objects:
+            obj_name = obj.name.lower()
+            if any(kw in obj_name for kw in global_skip_keywords):
+                continue
+            mesh = obj.data
+            if not mesh.uv_layers:
+                continue
+            uv_layer = mesh.uv_layers[0]
+            mats = mesh.materials
+            for poly in mesh.polygons:
+                mat = mats[poly.material_index] if poly.material_index < len(mats) else None
+                mat_name = mat.name.lower() if mat else ""
+                shader_name = (getattr(mat.shader_properties, "filename", "") or "").lower() if (mat and hasattr(mat, "shader_properties")) else ""
+                if any(kw in mat_name for kw in ["plate", "glass", "window", "windscreen", "mirror_interior", "lightsemissive", "stitch", "interior"]):
+                    continue
+                is_paint = ("vehicle_paint" in shader_name) or any(pk in mat_name for pk in paint_keywords)
+                if not is_paint:
+                    continue
+                for idx in poly.loop_indices:
+                    all_body_u.append(uv_layer.data[idx].uv[0])
+                    all_body_v.append(uv_layer.data[idx].uv[1])
+        if all_body_u and all_body_v:
+            scale_min_u, scale_max_u = min(all_body_u), max(all_body_u)
+            scale_min_v, scale_max_v = min(all_body_v), max(all_body_v)
+            span_u = scale_max_u - scale_min_u
+            span_v = scale_max_v - scale_min_v
+            # Neu toa do nam ngoai vung chuan [0, 1] hoac vuot tile
+            if span_u > 1.2 or span_v > 1.2 or scale_min_u < -0.1 or scale_max_u > 1.1 or scale_min_v < -0.1 or scale_max_v > 1.1:
+                multitile_mode = True
+                norm_max_span = max(span_u, span_v)
+                pad = 0.02 * norm_max_span
+                norm_span_with_pad = norm_max_span + 2 * pad
+                norm_off_u = (norm_max_span - span_u) / 2.0 + pad
+                norm_off_v = (norm_max_span - span_v) / 2.0 + pad
+
     # Ham quet va ve duong net theo bo loc
     def extract_lines(use_material_paint_filter=True):
         lines_drawn = 0
@@ -128,12 +212,15 @@ def generate_livery_template(target_xml_path, out_dir=None, target_size=4096, ex
             if not mesh.uv_layers:
                 continue
 
-            # Uu tien UVMap 1 (Livery Channel), neu khong co thi lay UVMap 0
+            # Chon UV Layer phu hop
             uv_layer = None
-            for layer in mesh.uv_layers:
-                if "1" in layer.name or "livery" in layer.name.lower() or "ch1" in layer.name.lower():
-                    uv_layer = layer
-                    break
+            if not use_uvmap_fallback:
+                # Uu tien UVMap 1 neu hop le
+                for layer in mesh.uv_layers:
+                    if "1" in layer.name or "livery" in layer.name.lower() or "ch1" in layer.name.lower():
+                        if is_layer_valid(mesh, layer):
+                            uv_layer = layer
+                            break
             if not uv_layer:
                 uv_layer = mesh.uv_layers[0]
 
@@ -162,17 +249,32 @@ def generate_livery_template(target_xml_path, out_dir=None, target_size=4096, ex
                         continue
 
                 poly_uvs = [uv_data[i].uv for i in poly.loop_indices]
-                if not is_valid_polygon(poly_uvs):
-                    continue
+
+                if not multitile_mode:
+                    if not is_valid_polygon(poly_uvs):
+                        continue
 
                 n = len(poly_uvs)
                 for i in range(n):
-                    u1, v1 = poly_uvs[i]
-                    u2, v2 = poly_uvs[(i + 1) % n]
+                    raw_u1, raw_v1 = poly_uvs[i]
+                    raw_u2, raw_v2 = poly_uvs[(i + 1) % n]
 
-                    # Loai bo duong seam wrapping cat ngang doc canvas (> 38%)
-                    if abs(u1 - u2) > 0.38 or abs(v1 - v2) > 0.38:
-                        continue
+                    if multitile_mode:
+                        u1 = (raw_u1 - scale_min_u + norm_off_u) / norm_span_with_pad
+                        v1 = (raw_v1 - scale_min_v + norm_off_v) / norm_span_with_pad
+                        u2 = (raw_u2 - scale_min_u + norm_off_u) / norm_span_with_pad
+                        v2 = (raw_v2 - scale_min_v + norm_off_v) / norm_span_with_pad
+
+                        # Loai bo duong seam cat ngang canvas (> 40%)
+                        if abs(u1 - u2) > 0.40 or abs(v1 - v2) > 0.40:
+                            continue
+                    else:
+                        u1, v1 = raw_u1, raw_v1
+                        u2, v2 = raw_u2, raw_v2
+
+                        # Loai bo duong seam wrapping cat ngang doc canvas (> 38%)
+                        if abs(u1 - u2) > 0.38 or abs(v1 - v2) > 0.38:
+                            continue
 
                     x1 = int(u1 * size)
                     y1 = int((1.0 - v1) * size)
@@ -193,15 +295,19 @@ def generate_livery_template(target_xml_path, out_dir=None, target_size=4096, ex
     # Chay che do uu tien: Loc theo Shader / Paint Material (Chat luong cao nhat, sieu sach)
     total_lines = extract_lines(use_material_paint_filter=True)
 
-    # Neu xe do khong gan shader paint nao (total_lines = 0) -> Fallback che do Object Name
+    # Neu xe do khong gan shader paint nao (total_lines == 0) -> Fallback che do Object Name
     if total_lines == 0:
         print("[THONG BAO] Khong tim thay shader vehicle_paint dac thu, chuyen sang che do Fallback Loc Than Vo...", flush=True)
         total_lines = extract_lines(use_material_paint_filter=False)
 
     print(f"[Buoc 3/4] Da trich xuat xong {total_lines} duong net UV than vo sieu sach!", flush=True)
 
-    if total_lines < 2000:
+    if total_lines < 500:
         print(f"[CANH BAO XE KHONG CO UV TEM] So duong net UV qua it ({total_lines} net). Xe nay CHUA DUOC TAC GIA UNWRAP UV TEM (Livery Map) cho than xe trong 3D model! Xe khong ho tro dan tem trong GTA V.", flush=True)
+    elif use_uvmap_fallback:
+        print(f"[THANH CONG UVMAP 0] Da tu dong trich xuat thanh cong {total_lines} net UV tu Kenh van goc xe (UVMap 0)!", flush=True)
+    else:
+        print(f"[THANH CONG] Da trich xuat thanh cong {total_lines} net UV tu Kenh Livery chuan (UVMap 1)!", flush=True)
 
     print(f"[Buoc 4/4] Dang ket xuat va luu file anh {size}x{size} 1:1...", flush=True)
 

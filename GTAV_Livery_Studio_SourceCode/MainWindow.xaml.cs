@@ -275,6 +275,7 @@ namespace GTAVLiveryStudio
                     Log($"[2/3] Đang gọi Blender 5.2 trích xuất kênh UV Livery ra thư mục xe: {originalFolder}...");
 
                     bool hasLiveryWarning = false;
+                    bool hasUV0Notice = false;
 
                     var psi = new ProcessStartInfo
                     {
@@ -305,6 +306,10 @@ namespace GTAVLiveryStudio
                                     if (line.Contains("[CANH BAO XE KHONG CO UV TEM]"))
                                     {
                                         hasLiveryWarning = true;
+                                    }
+                                    if (line.Contains("[THANH CONG UVMAP 0]") || line.Contains("[THONG BAO XE DUNG UVMAP 0]"))
+                                    {
+                                        hasUV0Notice = true;
                                     }
 
                                     if (line.Contains("[Buoc") || line.Contains("THANH CONG") || line.Contains("HOAN TAT") || line.Contains("THONG BAO") || line.Contains("CANH BAO") || line.Contains(">>>"))
@@ -374,6 +379,11 @@ namespace GTAVLiveryStudio
                                 UpdateProgress(100, "⚠️ Cảnh báo: Xe chưa mở kênh UV Tem!");
                                 SetResultBox(ResultStatus.Error, "CẢNH BÁO: XE KHÔNG CÓ UV TEM!", "Tác giả mod chưa unwrap kênh Livery trong file 3D. Xe không hỗ trợ dán tem trong GTA V.");
                                 MessageBox.Show("CẢNH BÁO: Model 3D của xe này CHƯA ĐƯỢC TÁC GIẢ UNWRAP UV TEM (Kênh UVMap 1 thân xe bị trống/bằng 0).\n\nXe này trong game GTA V không hỗ trợ dán tem livery (chỉ dùng sơn màu nguyên bản). Bạn hãy thử với các dòng xe có hỗ trợ Livery như xe Cảnh sát hoặc các xe mod có ghi 'Template Included'!", "Cảnh báo xe không có UV Tem", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            }
+                            else if (hasUV0Notice)
+                            {
+                                UpdateProgress(100, "✅ Hoàn tất trích xuất UV Vân Gốc (UVMap 0)!");
+                                SetResultBox(ResultStatus.Success, "ĐÃ XUẤT XONG UV VÂN GỐC (UVMAP 0)", "Xe chưa unwrap kênh Livery (Kênh 2), phần mềm đã tự động trích xuất kênh vân sơn gốc (Kênh 1 như trong Blender/ZMD3) cho bạn!");
                             }
                             else
                             {
